@@ -25,7 +25,7 @@ enum Faculties {
 	VF
 };
 
-struct Resident {
+struct Resident {			//жилец общежития
 	tLastname lastname;
 	tFirstname firstname;
 	tMiddlename middlename;
@@ -37,7 +37,7 @@ struct Resident {
 	Resident *next, *prev;
 };
 
-struct Staff {
+struct Staff {					//служащие в общежитии
 	tProfession profession;
 	tLastname lastname;
 	tFirstname firstname;
@@ -50,7 +50,7 @@ struct ResidentList {
 	struct Resident* head;
 };
 
-struct ResidentList* Initialization(){
+struct ResidentList* Initialization(){				//инциализировать список
 	struct ResidentList* residentList;
 	residentList = (ResidentList*)malloc(sizeof(ResidentList));
 	struct Resident* head;
@@ -62,7 +62,7 @@ struct ResidentList* Initialization(){
 	return(residentList);
 }
 
-void LoadStaff(Staff* staff){
+void LoadStaff(Staff* staff){			//загрузить данные о служащих из файла
 	FILE* file;
 	fopen_s(&file, "DormStaff.txt", "r");
 
@@ -83,7 +83,7 @@ void LoadStaff(Staff* staff){
 	return;
 }
 
-void ShowStaff(Staff *staff) {
+void ShowStaff(Staff *staff) {				//показать данные о служащих в общежитии
 	for (int i = 0; i < 8; i++){
 		printf_s("\n%s", staff[i].profession);
 		printf_s("%s", staff[i].lastname);
@@ -93,7 +93,7 @@ void ShowStaff(Staff *staff) {
 	}
 }
 
-void LoadResidents(ResidentList* list) {
+void LoadResidents(ResidentList* list) {			//загрузить данные о жильцах общежития из файла
 	FILE* file;
 	fopen_s(&file, "DormResidents.txt", "r");
 	char str[20] = "";
@@ -121,7 +121,7 @@ void LoadResidents(ResidentList* list) {
 	}
 }
 
-const char* getFacultyName(enum Faculties fac)
+const char* getFacultyName(enum Faculties fac)			//для отображения факультетов при выводе данных
 {
 	switch (fac)
 	{
@@ -135,22 +135,24 @@ const char* getFacultyName(enum Faculties fac)
 	}
 }
 
-void Report(ResidentList* list) {
+void Report(ResidentList* list) {			//отчет о жильцах общежития (вывод данных)
 	Resident* ptr = list->head;
+	int number = 1;
 	while (ptr) {
-		printf("\nStudent %s%s%s", ptr->lastname, ptr->firstname, ptr->middlename);
+		printf("\nStudent #%d %s%s%s", number, ptr->lastname, ptr->firstname, ptr->middlename);
 		printf("%s", getFacultyName(ptr->faculty));
 		printf("\nCourse: %d", ptr->course);
 		printf("\nGroup: %d", ptr->group);
 		printf("\nRoom number: %d", ptr->roomNumber);
 		printf("\nIs offences: %s\n", ptr->offence);
 		ptr = ptr->next;
+		number++;
 	}
 
 	free(ptr);
 }
 
-void Delete(ResidentList* list, Staff* staff){
+void Delete(ResidentList* list, Staff* staff){		//очистить память
 	free(staff);
 
 	while (list->head->next != nullptr){
@@ -162,7 +164,7 @@ void Delete(ResidentList* list, Staff* staff){
 }
 
 
-void AddResident(ResidentList* residentList){
+void AddResident(ResidentList* residentList){			//добавить нового жильца в общежитие
 	residentList->amount++;
 	if (residentList->amount != 1) {
 		Resident* prev = (Resident*)malloc(sizeof(Resident));
@@ -172,142 +174,129 @@ void AddResident(ResidentList* residentList){
 	}
 
 	int student;
-	printf("\nEnter Student's Lastname: ");
+	printf("Enter Student's Lastname: ");
+	fgets(residentList->head->lastname, 15, stdin);
 	fgets(residentList->head->lastname, 15, stdin);
 	fflush(stdin);
-	printf("\nEnter Student's Firstname: ");
+	printf("Enter Student's Firstname: ");
 	fgets(residentList->head->firstname, 15, stdin);
 	fflush(stdin);
-	printf("\nEnter Student's Middlename: ");
+	printf("Enter Student's Middlename: ");
 	fgets(residentList->head->middlename, 20, stdin);
 	fflush(stdin);
-	printf("\nEnter Student's Faculty number: ");
+	printf("Enter Student's Faculty number: ");
 	scanf_s("%d", &student);
 	residentList->head->faculty = (Faculties)student;
-	printf("\nEnter Student's course: ");
+	printf("Enter Student's course: ");
 	scanf_s("%d", &student);
 	residentList->head->course = student;
-	printf("\nEnter Student's group: ");
+	printf("Enter Student's group: ");
 	scanf_s("%d", &student);
 	residentList->head->group = student;
-	printf("\nEnter Student's room number: ");
+	printf("Enter Student's room number: ");
 	scanf_s("%d", &student);
 	residentList->head->roomNumber = student;
-	printf("\nIs offence?(+ or -) ");
+	printf("Is offence?(+ or -) ");
 	fgets(residentList->head->offence, 3, stdin);
+	fgets(residentList->head->offence, 15, stdin);
 	fflush(stdin);
 }
 
-void DeleteResident(ResidentList* list){
-	printf_s("Enter name: ");
-	tLastname nameSearch;
-	fgets(nameSearch, 15, stdin);
-	fflush(stdin);
-
-	while (list->head->next != nullptr){
-		for (int i = 0; nameSearch[i] != '\0' || list->head->lastname[i] != '\0'; i++) {
-			if (nameSearch[i] != list->head->lastname[i]) {
-				list->head = list->head->next;
-				break;
-			}
-		}
-
-		if (list->head->prev && list->head->next){
-			Resident* temp1 = (Resident*)malloc(sizeof(Resident));
-			Resident* temp2 = (Resident*)malloc(sizeof(Resident));
-			temp1 = list->head->prev;
-			temp2 = list->head->next;
-			temp1->next = temp2;
-			temp2->prev = temp1;
-		}
+void DeleteResident(ResidentList* list){		//удалить жильца из общежития по номеру 
+	printf_s("Enter number: ");
+	int forDelete;
+	scanf_s("%d", &forDelete);
+	if (forDelete == 1) {
+		list->head = list->head->next;
+		free(list->head->prev);
+		list->head->prev = NULL;
+		list->amount--;
 	}
-
-	for (int i = 0; nameSearch[i] != '\0' || list->head->lastname[i] != '\0'; i++) {
-		if (nameSearch[i] != list->head->lastname[i]) {
-			break;
+	else if (forDelete == list->amount) {
+		Resident *temp = list->head;
+		for (int i = 1; i < forDelete; i++) {
+			temp = temp->next;
 		}
-	}
 
-	if (list->head->prev && list->head->next){
-		Resident* temp1 = (Resident*)malloc(sizeof(Resident));
-		Resident* temp2 = (Resident*)malloc(sizeof(Resident));
-		temp1 = list->head->prev;
-		temp2 = list->head->next;
-		temp1->next = temp2;
-		temp2->prev = temp1;
+		temp->prev->next = NULL;
+		free(temp);
+		list->amount--;
+	}
+	else if (forDelete < list->amount) {
+		Resident* temp = list->head;
+		for (int i = 1; i < forDelete; i++) {
+			temp = temp->next;
+		}
+
+		temp->prev->next = temp->next;
+		temp->next->prev = temp->prev;
+		free(temp);
+		list->amount--;
 	}
 }
 
-void SearchName(ResidentList* list){
-	printf_s("Enter name: ");
+void SearchName(ResidentList* list){		//искать жильцов общежития по фамилии
+	int counter = 0;
+	Resident* temp = list->head;
+	printf_s("Enter Lastname: ");
 	tFirstname nameSearch;
 	fgets(nameSearch, 15, stdin);
+	fgets(nameSearch, 15, stdin);
 	fflush(stdin);
 
-	while (list->head->next != nullptr){
-		for (int i = 0; nameSearch[i] != '\0' || list->head->firstname[i] != '\0'; i++) {
-			if (nameSearch[i] != list->head->firstname[i]) {
-				list->head = list->head->next;
-				break;
-			}
+	while (temp) {
+		tFirstname subNameSearch;
+		strcpy_s(subNameSearch, nameSearch);
+		subNameSearch[0] -= 32;
+		if (!strcmp(temp->lastname, nameSearch) || !strcmp(temp->lastname, subNameSearch)) {
+			printf_s("\nLastname: %s", temp->lastname);
+			printf_s("Firstname: %s", temp->firstname);
+			printf_s("Middlename: %s", temp->middlename);
+			printf_s("Course: %d", temp->course);
+			printf_s("\nGroup: %d", temp->group);
+			printf_s("\nFaculty: %s", getFacultyName(temp->faculty));
+			printf_s("\nRoom: %d", temp->roomNumber);
+			printf("\nIs offences: %s\n", temp->offence);
+			counter++;
 		}
 
-		printf_s("\nLastname: %s", list->head->lastname);
-		printf_s("\nSurname: %s", list->head->firstname);
-		printf_s("\nCourse: %d", list->head->course);
-		printf_s("\nGroup: %d", list->head->group);
-		printf_s("\nFaculty: %s", getFacultyName(list->head->faculty));
-		printf_s("\nRoom: %d", list->head->roomNumber);
+		temp = temp->next;
 	}
 
-	for (int i = 0; nameSearch[i] != '\0' || list->head->firstname[i] != '\0'; i++) {
-		if (nameSearch[i] != list->head->firstname[i]) {
-			break;
-		}
+	if (!counter) {
+		printf("\nA resident with this Lastname does not live in the Dorm\n");
 	}
-
-	printf_s("\nLastname: %s", list->head->lastname);
-	printf_s("\nSurname: %s", list->head->firstname);
-	printf_s("\nCourse: %d", list->head->course);
-	printf_s("\nGroup: %d", list->head->group);
-	printf_s("\nFaculty: %s", getFacultyName(list->head->faculty));
-	printf_s("\nRoom: %d", list->head->roomNumber);
 }
 
-void SearchRoom(ResidentList* list){
+void SearchRoom(ResidentList* list){			//искать жильцов общежития по комнате
+	int counter = 0;
 	printf_s("Enter room: ");
 	tRoomNumber roomSearch;
 	scanf_s("%d", &roomSearch);
-	fflush(stdin);
-	while (list->head->prev != nullptr) {
-		list->head = list->head->prev;
-	}
-	while (list->head->next != nullptr){
-		if (list->head->roomNumber == roomSearch) {
-			printf_s("\nLastname: %s", list->head->lastname);
-			printf_s("\nSurname: %s", list->head->firstname);
-			printf_s("\nCourse: %d", list->head->course);
-			printf_s("\nGroup: %d", list->head->group);
-			printf_s("\nFaculty: %s", getFacultyName(list->head->faculty));
-			printf_s("\nRoom: %d", list->head->roomNumber);
-		}
+	Resident* temp = list->head;
 
-		else {
-			list->head = list->head->next;
+	while (temp){
+		if (temp->roomNumber == roomSearch) {
+			printf_s("\nLastname: %s", temp->lastname);
+			printf_s("Firstname: %s", temp->firstname);
+			printf_s("Middlename: %s", temp->middlename);
+			printf_s("Course: %d", temp->course);
+			printf_s("\nGroup: %d", temp->group);
+			printf_s("\nFaculty: %s", getFacultyName(temp->faculty));
+			printf_s("\nRoom: %d", temp->roomNumber);
+			printf("\nIs offences: %s\n", temp->offence);
+			counter++;
 		}
+		
+		temp = temp->next;
 	}
 
-	if (list->head->roomNumber == roomSearch){
-		printf_s("\nLastname: %s", list->head->lastname);
-		printf_s("\nSurname: %s", list->head->firstname);
-		printf_s("\nCourse: %d", list->head->course);
-		printf_s("\nGroup: %d", list->head->group);
-		printf_s("\nFaculty: %s", getFacultyName(list->head->faculty));
-		printf_s("\nRoom: %d", list->head->roomNumber);
+	if (!counter) {
+		printf("\nThis room is not occupied or does not exist\n");
 	}
 }
 
-void Menu() {
+void Menu() {			//отобразить меню доступных действий
 	printf("\n\t\t Menu");
 	printf("\n1) Add a resident to the dorm");
 	printf("\n2) Delete a resident from the dorm");
@@ -316,6 +305,7 @@ void Menu() {
 	printf("\n5) Report");
 	printf("\n6) Сontact information about the staff.");
 	printf("\n7) Exit\n");
+	printf("\nYour select: ");
 }
 
 int main(){
@@ -339,6 +329,8 @@ int main(){
 		case 6: ShowStaff(staff); break;
 		case 7: forExit = false; break;
 		}
+
+		fflush(stdin);
 	} while (forExit);
 
 	Delete(residentList, staff);
